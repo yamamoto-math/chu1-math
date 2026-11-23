@@ -73,9 +73,9 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .rlist .rd{color:var(--sub)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
-:root{--gold:#f2b705;--gold-ink:#3a2a00}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gold:#e0a82e;--gold-ink:#1d1500}}
-:root[data-theme="dark"]{--gold:#e0a82e;--gold-ink:#1d1500}
+:root{--gold:#f2b705;--gold-ink:#3a2a00;--silver:#8a96a8;--silver-ink:#fff;--bronze:#bf7535;--bronze-ink:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gold:#e0a82e;--gold-ink:#1d1500;--silver:#b6c0cf;--silver-ink:#12151c;--bronze:#d08a4a;--bronze-ink:#12151c}}
+:root[data-theme="dark"]{--gold:#e0a82e;--gold-ink:#1d1500;--silver:#b6c0cf;--silver-ink:#12151c;--bronze:#d08a4a;--bronze-ink:#12151c}
 .streak{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;line-height:1.5}
 .sn{flex:none;text-align:center;font-size:12px;color:var(--sub)}
 .sn b{display:block;font-size:30px;line-height:1.1;color:var(--pri)}
@@ -88,14 +88,21 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .d.future{opacity:.45}
 .d.today{box-shadow:inset 0 0 0 2px var(--pri);font-weight:700}
 .d.done{background:var(--pri);color:var(--pri-ink);font-weight:700}
-.d.perfect{background:var(--gold);color:var(--gold-ink);font-weight:800}
+.d.gold{background:var(--gold);color:var(--gold-ink);font-weight:800}
+.d.silver{background:var(--silver);color:var(--silver-ink);font-weight:800}
+.d.bronze{background:var(--bronze);color:var(--bronze-ink);font-weight:800}
 .cal-f{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;color:var(--sub);align-items:center}
 .cal-f span:last-child{margin-left:auto}
 .lg{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
-.lg.done{background:var(--pri)}.lg.perfect{background:var(--gold)}
-.stamp{width:104px;height:104px;border-radius:50%;border:4px solid var(--pri);color:var(--pri);margin:4px auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:13px;transform:rotate(-12deg);animation:stp .5s cubic-bezier(.2,1.6,.4,1) both}
-.stamp span{font-size:22px;line-height:1.2}
-.stamp.gold{border-color:var(--gold);color:var(--gold)}
+.lg.done{background:var(--pri)}.lg.gold{background:var(--gold)}.lg.silver{background:var(--silver)}.lg.bronze{background:var(--bronze)}
+.stamp{width:92px;height:92px;border-radius:50%;border:4px solid var(--pri);color:var(--pri);margin:4px auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:13px;transform:rotate(-12deg);animation:stp .5s cubic-bezier(.2,1.6,.4,1) both}
+.stamp span{font-size:20px;line-height:1.2}
+.stamp.gold{width:136px;height:136px;border-width:6px;border-color:var(--gold);color:var(--gold);font-size:16px}
+.stamp.gold span{font-size:30px}
+.stamp.silver{width:118px;height:118px;border-width:5px;border-color:var(--silver);color:var(--silver);font-size:15px}
+.stamp.silver span{font-size:26px}
+.stamp.bronze{width:104px;height:104px;border-color:var(--bronze);color:var(--bronze);font-size:14px}
+.stamp.bronze span{font-size:23px}
 @keyframes stp{from{transform:scale(2.2) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
 @media (prefers-reduced-motion:reduce){.stamp{animation:none}}
 .stk{text-align:center;font-size:14px;color:var(--sub)}
@@ -277,6 +284,8 @@ if(!UNITS[S.unit]) S.unit='eq';
 /* ---------- カレンダー ---------- */
 const p2=n=>String(n).padStart(2,'0');
 const dk=d=>`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+const RK=['gold','silver','bronze','done'], RKN=['金','銀','銅',''];
+const rankOf=v=>v.r!==undefined?v.r:(v.p?0:3);   // 0金 1銀 2銅 3ふつう
 function streak(days){const d=new Date();let n=0;if(!days[dk(d)])d.setDate(d.getDate()-1);while(days[dk(d)]){n++;d.setDate(d.getDate()-1);}return n;}
 function calHTML(days){
   const y=S.cy,m=S.cm,first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate(),tk=dk(new Date()),pre=`${y}-${p2(m+1)}-`;
@@ -284,12 +293,12 @@ function calHTML(days){
   for(let i=0;i<first;i++) h+='<div></div>';
   for(let d=1;d<=last;d++){
     const k=pre+p2(d),v=days[k],wd=(first+d-1)%7;
-    h+=`<div class="d ${wd===0?'sun':wd===6?'sat':''} ${k===tk?'today':''} ${k>tk?'future':''} ${v?(v.p?'perfect':'done'):''}" aria-label="${m+1}月${d}日${v?(v.p?' 全問正解':' 取り組んだ日'):''}">${d}</div>`;
+    h+=`<div class="d ${wd===0?'sun':wd===6?'sat':''} ${k===tk?'today':''} ${k>tk?'future':''} ${v?RK[rankOf(v)]:''}" aria-label="${m+1}月${d}日${v?(rankOf(v)<3?` ${RKN[rankOf(v)]}のマーク`:' 取り組んだ日'):''}">${d}</div>`;
   }
   const cnt=Object.keys(days).filter(k=>k.startsWith(pre)).length;
   return `<div class="cal-h"><button id="cprev" aria-label="前の月">‹</button><b>${y}年 ${m+1}月</b><button id="cnext" aria-label="次の月">›</button></div>
   <div class="cal">${h}</div>
-  <div class="cal-f"><span><i class="lg done"></i>取り組んだ日</span><span><i class="lg perfect"></i>全問正解の日</span><span>今月 <b>${cnt}</b> 日</span></div>`;
+  <div class="cal-f"><span><i class="lg gold"></i>全問正解</span><span><i class="lg silver"></i>1問ミス</span><span><i class="lg bronze"></i>2問ミス</span><span><i class="lg done"></i>取り組んだ日</span><span>今月 <b>${cnt}</b> 日</span></div>`;
 }
 function bindCal(days){
   const mv=s=>{S.cm+=s;if(S.cm<0){S.cm=11;S.cy--;}if(S.cm>11){S.cm=0;S.cy++;}$('calbox').innerHTML=calHTML(days);bindCal(days);};
@@ -419,7 +428,9 @@ function result(){
   const d=new Date(), ds=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
   const hist=store.get('mh_hist',[]); hist.unshift({date:ds,unit:UNITS[S.unit].name,level:LEVELS[S.level],score:sc,total:tot}); store.set('mh_hist',hist.slice(0,30));
   const days=store.get('mh_days',{}), k=dk(d), firstToday=!days[k];
-  days[k]={n:((days[k]&&days[k].n)||0)+1,p:!!(days[k]&&days[k].p)||sc===tot}; store.set('mh_days',days);
+  const miss=tot-sc, rank=miss<=2?miss:3, prev=days[k]?rankOf(days[k]):3;
+  days[k]={n:((days[k]&&days[k].n)||0)+1,r:Math.min(prev,rank)}; store.set('mh_days',days);
+  const best=days[k].r;
   const st=streak(days);
   const msg=pct===1?'全問正解！すばらしい！':pct>=.8?'よくできました！':pct>=.5?'あと少し！まちがえた問題を見直そう':'解き方を読んで、もう一度チャレンジしよう';
   const text=[`【数学の宿題 結果】`,`名前：${S.name||'（未入力）'}`,`単元：中1 ${UNITS[S.unit].name}（${LEVELS[S.level]}）`,`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,`れんぞく：${st}日`,'',
@@ -427,8 +438,8 @@ function result(){
   app.innerHTML=`
   <header class="top"><h1>結果</h1><p class="sub">${esc(S.name||'')} ${UNITS[S.unit].name}・${LEVELS[S.level]}</p></header>
   <section class="card">
-    <div class="stamp ${days[k].p?'gold':''}"><span>${d.getMonth()+1}/${d.getDate()}</span>${firstToday?'マークGET！':'今日もできた！'}</div>
-    <div class="stk">${sc===tot?'全問正解で<b>金のマーク</b>！':days[k].p?'今日は<b>金のマーク</b>ゲットずみ':'カレンダーにマークがついたよ'}　れんぞく <b>${st}</b> 日</div>
+    <div class="stamp ${RK[rank]}"><span>${d.getMonth()+1}/${d.getDate()}</span>${rank<3?RKN[rank]+'のハンコ！':firstToday?'マークGET！':'今日もできた！'}</div>
+    <div class="stk">${['全問正解で<b>金のハンコ</b>！','1問ミスで<b>銀のハンコ</b>！あと1問で金！','2問ミスで<b>銅のハンコ</b>！','カレンダーにマークがついたよ'][rank]}${best<rank?`<br>今日のカレンダーは<b>${RKN[best]}のマーク</b>のまま`:''}<br>れんぞく <b>${st}</b> 日</div>
     <div class="score"><b>${sc}</b><small> / ${tot}</small><p>${msg}</p></div>
     <button class="btn pri big" id="copy">結果をコピーして先生に送る</button>
     <div class="row2"><button class="btn" id="again">もう一度</button><button class="btn" id="home">ホームへ</button></div></section>
