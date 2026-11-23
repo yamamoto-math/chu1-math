@@ -70,9 +70,36 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .rlist li:first-child{border-top:0}
 .rlist .m{font-weight:800;font-size:18px}
 .rlist .m.ok{color:var(--ok)}.rlist .m.ng{color:var(--ng)}
-.rlist .d{color:var(--sub)}
+.rlist .rd{color:var(--sub)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
+:root{--gold:#f2b705;--gold-ink:#3a2a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gold:#e0a82e;--gold-ink:#1d1500}}
+:root[data-theme="dark"]{--gold:#e0a82e;--gold-ink:#1d1500}
+.streak{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;line-height:1.5}
+.sn{flex:none;text-align:center;font-size:12px;color:var(--sub)}
+.sn b{display:block;font-size:30px;line-height:1.1;color:var(--pri)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.cal-h button{width:40px;height:40px;border:0;border-radius:10px;background:var(--key);font-size:20px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;text-align:center}
+.wd{font-size:12px;color:var(--sub);padding:2px 0}
+.d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px}
+.sun{color:var(--ng)}.sat{color:var(--pri)}
+.d.future{opacity:.45}
+.d.today{box-shadow:inset 0 0 0 2px var(--pri);font-weight:700}
+.d.done{background:var(--pri);color:var(--pri-ink);font-weight:700}
+.d.perfect{background:var(--gold);color:var(--gold-ink);font-weight:800}
+.cal-f{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;color:var(--sub);align-items:center}
+.cal-f span:last-child{margin-left:auto}
+.lg{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+.lg.done{background:var(--pri)}.lg.perfect{background:var(--gold)}
+.stamp{width:104px;height:104px;border-radius:50%;border:4px solid var(--pri);color:var(--pri);margin:4px auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:13px;transform:rotate(-12deg);animation:stp .5s cubic-bezier(.2,1.6,.4,1) both}
+.stamp span{font-size:22px;line-height:1.2}
+.stamp.gold{border-color:var(--gold);color:var(--gold)}
+@keyframes stp{from{transform:scale(2.2) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
+@media (prefers-reduced-motion:reduce){.stamp{animation:none}}
+.stk{text-align:center;font-size:14px;color:var(--sub)}
+.stk b{color:var(--pri);font-size:18px}
 svg text{font-family:inherit}
 .gl{stroke:var(--grid);stroke-width:1}
 .ax{stroke:var(--axis);stroke-width:1.5}
@@ -246,6 +273,28 @@ const UNITS={prop:{name:'比例と反比例',gen:genProp},eq:{name:'方程式',g
 const LEVELS={basic:'基本',std:'標準'};
 const S={name:store.get('mh_name',''),unit:store.get('mh_unit','eq'),level:store.get('mh_level','basic'),count:store.get('mh_count',5)};
 if(!UNITS[S.unit]) S.unit='eq';
+
+/* ---------- カレンダー ---------- */
+const p2=n=>String(n).padStart(2,'0');
+const dk=d=>`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+function streak(days){const d=new Date();let n=0;if(!days[dk(d)])d.setDate(d.getDate()-1);while(days[dk(d)]){n++;d.setDate(d.getDate()-1);}return n;}
+function calHTML(days){
+  const y=S.cy,m=S.cm,first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate(),tk=dk(new Date()),pre=`${y}-${p2(m+1)}-`;
+  let h=['日','月','火','水','木','金','土'].map((w,i)=>`<div class="wd ${i===0?'sun':i===6?'sat':''}">${w}</div>`).join('');
+  for(let i=0;i<first;i++) h+='<div></div>';
+  for(let d=1;d<=last;d++){
+    const k=pre+p2(d),v=days[k],wd=(first+d-1)%7;
+    h+=`<div class="d ${wd===0?'sun':wd===6?'sat':''} ${k===tk?'today':''} ${k>tk?'future':''} ${v?(v.p?'perfect':'done'):''}" aria-label="${m+1}月${d}日${v?(v.p?' 全問正解':' 取り組んだ日'):''}">${d}</div>`;
+  }
+  const cnt=Object.keys(days).filter(k=>k.startsWith(pre)).length;
+  return `<div class="cal-h"><button id="cprev" aria-label="前の月">‹</button><b>${y}年 ${m+1}月</b><button id="cnext" aria-label="次の月">›</button></div>
+  <div class="cal">${h}</div>
+  <div class="cal-f"><span><i class="lg done"></i>取り組んだ日</span><span><i class="lg perfect"></i>全問正解の日</span><span>今月 <b>${cnt}</b> 日</span></div>`;
+}
+function bindCal(days){
+  const mv=s=>{S.cm+=s;if(S.cm<0){S.cm=11;S.cy--;}if(S.cm>11){S.cm=0;S.cy++;}$('calbox').innerHTML=calHTML(days);bindCal(days);};
+  $('cprev').onclick=()=>mv(-1); $('cnext').onclick=()=>mv(1);
+}
 let Q=null;
 const app=document.getElementById('app');
 const $=id=>document.getElementById(id);
@@ -259,10 +308,15 @@ function plain(html){
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800);}
 
 function home(){
-  const hist=store.get('mh_hist',[]);
+  const hist=store.get('mh_hist',[]), days=store.get('mh_days',{}), st=streak(days), today=!!days[dk(new Date())];
+  const now=new Date(); S.cy=now.getFullYear(); S.cm=now.getMonth();
   const seg=(id,obj,cur)=>`<div class="seg ${id==='units'?'col':''}" id="${id}">${Object.entries(obj).map(([k,v])=>`<button class="opt ${String(cur)===k?'on':''}" data-k="${k}">${v}</button>`).join('')}</div>`;
   app.innerHTML=`
   <header class="top"><h1>中1 数学ドリル</h1><p class="sub">単元を選んで、問題をといてみよう</p></header>
+  <section class="card">
+    <div class="streak"><div>${today?'<b>今日のマーク、ついてるよ！</b><br>この調子で明日もマークをふやそう':'<b>今日はまだマークがないよ</b><br>1回といて、カレンダーにマークをつけよう'}</div><div class="sn">れんぞく<b>${st}</b>日</div></div>
+    <div id="calbox">${calHTML(days)}</div>
+  </section>
   <section class="card">
     <label class="lbl" for="nm">なまえ</label>
     <input id="nm" class="txt" type="text" placeholder="例：山田 花子" value="${esc(S.name)}" maxlength="20" autocomplete="off">
@@ -276,6 +330,7 @@ function home(){
   bind('units','unit',String);bind('levels','level',String);bind('counts','count',Number);
   $('nm').addEventListener('input',e=>{S.name=e.target.value.trim();store.set('mh_name',S.name);});
   $('start').onclick=start;
+  bindCal(days);
   window.scrollTo(0,0);
 }
 
@@ -363,15 +418,21 @@ function result(){
   const sc=Q.res.filter(r=>r.ok).length, tot=Q.res.length, pct=sc/tot;
   const d=new Date(), ds=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
   const hist=store.get('mh_hist',[]); hist.unshift({date:ds,unit:UNITS[S.unit].name,level:LEVELS[S.level],score:sc,total:tot}); store.set('mh_hist',hist.slice(0,30));
+  const days=store.get('mh_days',{}), k=dk(d), firstToday=!days[k];
+  days[k]={n:((days[k]&&days[k].n)||0)+1,p:!!(days[k]&&days[k].p)||sc===tot}; store.set('mh_days',days);
+  const st=streak(days);
   const msg=pct===1?'全問正解！すばらしい！':pct>=.8?'よくできました！':pct>=.5?'あと少し！まちがえた問題を見直そう':'解き方を読んで、もう一度チャレンジしよう';
-  const text=[`【数学の宿題 結果】`,`名前：${S.name||'（未入力）'}`,`単元：中1 ${UNITS[S.unit].name}（${LEVELS[S.level]}）`,`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,'',
+  const text=[`【数学の宿題 結果】`,`名前：${S.name||'（未入力）'}`,`単元：中1 ${UNITS[S.unit].name}（${LEVELS[S.level]}）`,`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,`れんぞく：${st}日`,'',
     ...Q.res.map((r,i)=>`${i+1}. ${r.ok?'◯':'✕'} ${plain(r.q.text)}\n   答え：${r.inp}${r.ok?'':`（正：${fmtAns(r.q)}）`}`)].join('\n');
   app.innerHTML=`
   <header class="top"><h1>結果</h1><p class="sub">${esc(S.name||'')} ${UNITS[S.unit].name}・${LEVELS[S.level]}</p></header>
-  <section class="card"><div class="score"><b>${sc}</b><small> / ${tot}</small><p>${msg}</p></div>
+  <section class="card">
+    <div class="stamp ${days[k].p?'gold':''}"><span>${d.getMonth()+1}/${d.getDate()}</span>${firstToday?'マークGET！':'今日もできた！'}</div>
+    <div class="stk">${sc===tot?'全問正解で<b>金のマーク</b>！':days[k].p?'今日は<b>金のマーク</b>ゲットずみ':'カレンダーにマークがついたよ'}　れんぞく <b>${st}</b> 日</div>
+    <div class="score"><b>${sc}</b><small> / ${tot}</small><p>${msg}</p></div>
     <button class="btn pri big" id="copy">結果をコピーして先生に送る</button>
     <div class="row2"><button class="btn" id="again">もう一度</button><button class="btn" id="home">ホームへ</button></div></section>
-  <section class="card"><h2>ふりかえり</h2><ul class="rlist">${Q.res.map((r,i)=>`<li><span class="m ${r.ok?'ok':'ng'}">${r.ok?'◯':'✕'}</span><div><div>${i+1}. ${esc(plain(r.q.text))}</div><div class="d">あなた：${esc(r.inp)}${r.ok?'':`　正解：${fmtAns(r.q)}`}</div></div></li>`).join('')}</ul></section>`;
+  <section class="card"><h2>ふりかえり</h2><ul class="rlist">${Q.res.map((r,i)=>`<li><span class="m ${r.ok?'ok':'ng'}">${r.ok?'◯':'✕'}</span><div><div>${i+1}. ${esc(plain(r.q.text))}</div><div class="rd">あなた：${esc(r.inp)}${r.ok?'':`　正解：${fmtAns(r.q)}`}</div></div></li>`).join('')}</ul></section>`;
   $('copy').onclick=()=>copy(text);
   $('again').onclick=start; $('home').onclick=home;
   window.scrollTo(0,0);
