@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>中1数学ドリル</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1d2433;--sub:#5b6478;--line:#e2e6ef;--pri:#2f6fed;--pri-ink:#fff;--ok:#1a8a4a;--ok-bg:#e7f6ee;--ng:#c93c3c;--ng-bg:#fdecec;--key:#eef1f7;--grid:#d9deea;--axis:#5b6478;--shA:#2f6fed;--shB:#e8833a;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--card:#1b2030;--ink:#e8ebf2;--sub:#9aa3b8;--line:#2b3246;--pri:#6b96ff;--pri-ink:#0d1220;--ok:#4cc38a;--ok-bg:#16332a;--ng:#ff7a7a;--ng-bg:#3a1d22;--key:#252b3d;--grid:#2e3549;--axis:#9aa3b8;--shA:#6b96ff;--shB:#f0a060;}}
+:root[data-theme="dark"]{--bg:#12151c;--card:#1b2030;--ink:#e8ebf2;--sub:#9aa3b8;--line:#2b3246;--pri:#6b96ff;--pri-ink:#0d1220;--ok:#4cc38a;--ok-bg:#16332a;--ng:#ff7a7a;--ng-bg:#3a1d22;--key:#252b3d;--grid:#2e3549;--axis:#9aa3b8;--shA:#6b96ff;--shB:#f0a060;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#app{max-width:560px;margin:0 auto;padding:16px 16px calc(32px + env(safe-area-inset-bottom))}
+.top{padding:12px 4px 8px}
+.top h1{margin:0;font-size:24px;letter-spacing:.02em}
+.sub{margin:4px 0 0;color:var(--sub);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+.card h2{font-size:16px;margin:0 0 8px}
+.lbl{display:block;font-size:13px;color:var(--sub);margin:16px 0 6px;font-weight:600}
+.lbl:first-child{margin-top:0}
+.txt{width:100%;font:inherit;font-size:16px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+.seg.col{grid-auto-flow:row}
+.opt{padding:12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font-size:15px;font-weight:600;text-align:center}
+.opt.on{border-color:var(--pri);background:var(--pri);color:var(--pri-ink)}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;background:var(--key)}
+.btn.pri{background:var(--pri);color:var(--pri-ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.big{margin-top:20px;padding:16px;font-size:17px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:flex;gap:8px;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.hist li:first-child{border-top:0}
+.hist span:first-child{color:var(--sub);white-space:nowrap}
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;color:var(--sub)}
+.link{background:none;border:0;padding:6px 0;color:var(--pri);font-weight:600}
+.cnt{font-weight:700;color:var(--ink)}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pri);transition:width .3s}
+.qno{font-size:13px;font-weight:700;color:var(--pri)}
+.qtext{font-size:18px;line-height:1.8;margin-top:6px}
+.qtext .eq{display:block;text-align:center;font-size:24px;font-weight:700;margin:8px 0;white-space:nowrap}
+.fig{margin-top:12px;display:flex;justify-content:center}
+.fig svg{width:100%;max-width:320px;height:auto}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.1;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.arow{display:flex;align-items:center;justify-content:center;gap:8px;font-size:22px;font-weight:700;flex-wrap:wrap}
+.box{min-width:96px;height:52px;padding:0 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);font-size:24px;font-weight:700}
+.box.f{border-color:var(--pri);box-shadow:0 0 0 3px color-mix(in srgb,var(--pri) 25%,transparent)}
+.coord .box{min-width:72px}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.keys button{height:54px;border:0;border-radius:12px;background:var(--key);font-size:22px;font-weight:700}
+.keys button:active{filter:brightness(.92)}
+.choices{display:grid;gap:8px}
+.choices .opt{font-size:17px;padding:14px}
+.fb{border-radius:12px;padding:14px;font-size:16px}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}
+.fb.ng{background:var(--ng-bg);color:var(--ng)}
+.mark{font-size:22px;font-weight:800;margin-bottom:4px}
+.fb .you{color:var(--ink);font-size:15px}
+.exp{margin-top:12px;line-height:1.9;font-size:16px}
+.exph{font-size:13px;font-weight:700;color:var(--sub);margin-bottom:4px}
+.score{text-align:center;padding:12px 0 4px}
+.score b{font-size:56px;line-height:1}
+.score small{font-size:20px;color:var(--sub)}
+.score p{margin:8px 0 0;font-size:16px}
+.rlist{list-style:none;margin:0;padding:0}
+.rlist li{display:grid;grid-template-columns:28px 1fr;gap:6px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.6}
+.rlist li:first-child{border-top:0}
+.rlist .m{font-weight:800;font-size:18px}
+.rlist .m.ok{color:var(--ok)}.rlist .m.ng{color:var(--ng)}
+.rlist .d{color:var(--sub)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+svg text{font-family:inherit}
+.gl{stroke:var(--grid);stroke-width:1}
+.ax{stroke:var(--axis);stroke-width:1.5}
+.arh{fill:var(--axis)}
+.tk{fill:var(--sub);font-size:9px}
+.axl{fill:var(--sub);font-size:12px;font-style:italic}
+.pt{fill:var(--pri)}
+.ptl{fill:var(--ink);font-size:13px;font-weight:700}
+.shA{fill:color-mix(in srgb,var(--shA) 30%,transparent);stroke:var(--shA);stroke-width:2}
+.shB{fill:color-mix(in srgb,var(--shB) 30%,transparent);stroke:var(--shB);stroke-width:2}
+.shl{fill:var(--ink);font-size:14px;font-weight:700}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div class="toast" id="toast"></div>
+<script>
+/* ---------- 小道具 ---------- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[R(0,a.length-1)];
+const nz=(a,b)=>{let v;do v=R(a,b);while(v===0);return v;};
+const M=n=>n<0?'−'+(-n):''+n;            // 表示用の数
+const P=n=>n<0?'('+M(n)+')':M(n);         // 代入するとき用（負はかっこ）
+const A=n=>Math.abs(n);
+function lin(a,b){                         // ax + b を文字に
+  let s='';
+  if(a!==0) s=a===1?'x':a===-1?'−x':M(a)+'x';
+  if(b!==0){ if(s) s+=b>0?' + '+b:' − '+(-b); else s=M(b); }
+  return s||'0';
+}
+const frac=(n,d)=>`<span class="frac" data-t="${n}/${d}"><span>${n}</span><span>${d}</span></span>`;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- 比例と反比例 ---------- */
+function genProp(lv){
+  const std=lv==='std';
+  const t=R(0,3);
+  if(t===0){
+    const a=std?nz(-6,6):R(2,6), x=std?nz(-5,5):R(2,5), y=a*x;
+    return {type:'num',label:'a =',answer:a,
+      text:`y は x に<b>比例</b>し、x = ${M(x)} のとき y = ${M(y)} です。<br>比例定数 a を求めなさい。`,
+      explain:`比例の式 y = ax に x = ${M(x)}, y = ${M(y)} を代入します。<br>${M(y)} = a × ${P(x)}<br>a = ${M(y)} ÷ ${P(x)} = <b>${M(a)}</b>`};
+  }
+  if(t===1){
+    const a=std?nz(-5,5):R(2,5), x1=std?nz(-4,4):R(1,4); let x2; do x2=std?nz(-6,6):R(2,6); while(x2===x1);
+    const y1=a*x1, ans=a*x2;
+    return {type:'num',label:'y =',answer:ans,
+      text:`y は x に<b>比例</b>し、x = ${M(x1)} のとき y = ${M(y1)} です。<br>x = ${M(x2)} のときの y の値を求めなさい。`,
+      explain:`y = ax に代入して ${M(y1)} = a × ${P(x1)} より a = ${M(a)}<br>式は y = ${lin(a,0)}<br>x = ${M(x2)} を代入すると y = ${M(a)} × ${P(x2)} = <b>${M(ans)}</b>`};
+  }
+  if(t===2){
+    const x=std?nz(-6,6):R(2,6), y=std?nz(-6,6):R(2,6), a=x*y;
+    return {type:'num',label:'a =',answer:a,
+      text:`y は x に<b>反比例</b>し、x = ${M(x)} のとき y = ${M(y)} です。<br>比例定数 a を求めなさい。`,
+      explain:`反比例の式 y = ${frac('a','x')} は、a = xy と同じです。<br>a = ${M(x)} × ${P(y)} = <b>${M(a)}</b>`};
+  }
+  const base=pick([12,18,24,30,36]), a=std&&Math.random()<.5?-base:base;
+  const ds=[]; for(let i=2;i<base;i++) if(base%i===0) ds.push(i);
+  const sg=()=>std&&Math.random()<.4?-1:1;
+  const x1=pick(ds)*sg(); let x2; do x2=pick(ds)*sg(); while(x2===x1);
+  const y1=a/x1, ans=a/x2;
+  return {type:'num',label:'y =',answer:ans,
+    text:`y は x に<b>反比例</b>し、x = ${M(x1)} のとき y = ${M(y1)} です。<br>x = ${M(x2)} のときの y の値を求めなさい。`,
+    explain:`a = xy = ${M(x1)} × ${P(y1)} = ${M(a)}<br>式は y = ${frac(M(a),'x')}<br>x = ${M(x2)} を代入すると y = ${M(a)} ÷ ${P(x2)} = <b>${M(ans)}</b>`};
+}
+
+/* ---------- 方程式 ---------- */
+function genEq(lv){
+  const std=lv==='std';
+  const t=pick(std?[0,1,2,3,4]:[0,0,1,1,4]);
+  if(t===0){
+    const a=std?pick([-9,-8,-7,-6,-5,-4,-3,-2,2,3,4,5,6,7,8,9]):R(2,9), s=std?nz(-9,9):R(1,9), b=std?nz(-12,12):R(1,15), c=a*s+b;
+    return {type:'num',label:'x =',answer:s,
+      text:`次の方程式を解きなさい。<span class="eq">${lin(a,b)} = ${M(c)}</span>`,
+      explain:`${b>0?'+':'−'}${A(b)} を右辺に移項します（符号が変わる）。<br>${lin(a,0)} = ${M(c)} ${b>0?'−':'+'} ${A(b)}<br>${lin(a,0)} = ${M(c-b)}<br>両辺を ${M(a)} でわって x = <b>${M(s)}</b>`};
+  }
+  if(t===1){
+    let a,c; do{ a=std?nz(-9,9):R(3,9); c=std?nz(-9,9):R(1,a-1); }while(a===c);
+    const s=std?nz(-8,8):R(1,8), b=std?nz(-12,12):R(-9,12)||4, d=(a-c)*s+b;
+    return {type:'num',label:'x =',answer:s,
+      text:`次の方程式を解きなさい。<span class="eq">${lin(a,b)} = ${lin(c,d)}</span>`,
+      explain:`x の項を左辺、数の項を右辺に移項します。<br>${lin(a,0)} ${c>0?'−':'+'} ${A(c)===1?'':A(c)}x = ${M(d)} ${b>0?'−':'+'} ${A(b)}<br>${lin(a-c,0)} = ${M(d-b)}<br>x = <b>${M(s)}</b>`};
+  }
+  if(t===2){
+    const a=pick([-5,-4,-3,-2,2,3,4,5,6]), b=nz(-6,6), s=nz(-8,8), c=a*(s+b);
+    return {type:'num',label:'x =',answer:s,
+      text:`次の方程式を解きなさい。<span class="eq">${M(a)}(${lin(1,b)}) = ${M(c)}</span>`,
+      explain:`かっこをはずします。<br>${lin(a,a*b)} = ${M(c)}<br>${lin(a,0)} = ${M(c)} ${a*b>0?'−':'+'} ${A(a*b)} = ${M(c-a*b)}<br>x = <b>${M(s)}</b>`};
+  }
+  if(t===3){
+    const a=R(2,5), k=nz(-6,6), s=a*k, b=nz(-8,8), c=k+b;
+    return {type:'num',label:'x =',answer:s,
+      text:`次の方程式を解きなさい。<span class="eq">${frac('x',a)} ${b>0?'+ '+b:'− '+(-b)} = ${M(c)}</span>`,
+      explain:`両辺に ${a} をかけて分母をはらいます。<br>${lin(1,a*b)} = ${M(a*c)}<br>x = ${M(a*c)} ${a*b>0?'−':'+'} ${A(a*b)} = <b>${M(s)}</b>`};
+  }
+  const p=R(8,15)*10, n=R(2,8), q=R(5,12)*10, r=p*n+q;
+  return {type:'num',label:'答え',unit:'冊',answer:n,
+    text:`1冊 ${p} 円のノートを何冊かと、${q} 円のペンを1本買ったら、代金の合計は ${r} 円でした。<br>ノートを何冊買いましたか。`,
+    explain:`ノートを x 冊とすると<br>${p}x + ${q} = ${r}<br>${p}x = ${r-q}<br>x = ${n}　→　<b>${n} 冊</b>`};
+}
+
+/* ---------- 図形の移動 ---------- */
+function plane(pts){
+  const N=6,c=20,W=(2*N+2)*c,o=W/2,X=x=>o+x*c,Y=y=>o-y*c;
+  let g=`<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="arh"/></marker></defs>`;
+  for(let i=-N;i<=N;i++) g+=`<line x1="${X(i)}" y1="${Y(-N)}" x2="${X(i)}" y2="${Y(N)}" class="gl"/><line x1="${X(-N)}" y1="${Y(i)}" x2="${X(N)}" y2="${Y(i)}" class="gl"/>`;
+  g+=`<line x1="${X(-N-.6)}" y1="${o}" x2="${X(N+.7)}" y2="${o}" class="ax" marker-end="url(#ar)"/><line x1="${o}" y1="${Y(-N-.6)}" x2="${o}" y2="${Y(N+.7)}" class="ax" marker-end="url(#ar)"/>`;
+  g+=`<text x="${X(N+.5)}" y="${o+14}" class="axl">x</text><text x="${o+6}" y="${Y(N+.4)}" class="axl">y</text><text x="${o-11}" y="${o+13}" class="axl">O</text>`;
+  for(const i of [-6,-4,-2,2,4,6]){ g+=`<text x="${X(i)}" y="${o+12}" text-anchor="middle" class="tk">${M(i)}</text><text x="${o-4}" y="${Y(i)+3}" text-anchor="end" class="tk">${M(i)}</text>`; }
+  for(const p of pts) g+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4.5" class="pt"/><text x="${X(p.x)+6}" y="${Y(p.y)-6}" class="ptl">${p.label}</text>`;
+  return `<svg viewBox="0 0 ${W} ${W}" role="img" aria-label="座標平面">${g}</svg>`;
+}
+function shapeFig(a,b){
+  const c=24,Wc=12,Hc=8,W=Wc*c,H=Hc*c,X=x=>x*c,Y=y=>H-y*c;
+  let g='';
+  for(let i=0;i<=Wc;i++) g+=`<line x1="${X(i)}" y1="0" x2="${X(i)}" y2="${H}" class="gl"/>`;
+  for(let j=0;j<=Hc;j++) g+=`<line x1="0" y1="${Y(j)}" x2="${W}" y2="${Y(j)}" class="gl"/>`;
+  const poly=(ps,cl,l)=>{const cx=ps.reduce((s,p)=>s+p[0],0)/3,cy=ps.reduce((s,p)=>s+p[1],0)/3;
+    return `<polygon points="${ps.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" class="${cl}"/><text x="${X(cx)}" y="${Y(cy)+5}" text-anchor="middle" class="shl">${l}</text>`;};
+  return `<svg viewBox="-2 -2 ${W+4} ${H+4}" role="img" aria-label="図形アと図形イ">${g}${poly(a,'shA','ア')}${poly(b,'shB','イ')}</svg>`;
+}
+function genMove(lv){
+  const std=lv==='std';
+  const t=pick(std?[0,1,2,3,3,4]:[0,1,2,3,3]);
+  const pt=()=>std?nz(-4,4):R(1,4);
+  if(t===0){
+    const x=pt(),y=pt(),dx=nz(-4,4),dy=nz(-4,4),ax=x+dx,ay=y+dy;
+    return {type:'coord',label:'A′',answer:[ax,ay],svg:plane([{x,y,label:'A'}]),
+      text:`点 A(${M(x)}, ${M(y)}) を、<b>${dx>0?'右':'左'}に ${A(dx)}、${dy>0?'上':'下'}に ${A(dy)}</b> 平行移動した点 A′ の座標を求めなさい。`,
+      explain:`${dx>0?'右':'左'}へ動くと x 座標が ${dx>0?'ふえ':'へり'}、${dy>0?'上':'下'}へ動くと y 座標が ${dy>0?'ふえ':'へり'}ます。<br>x 座標：${M(x)} ${dx>0?'+':'−'} ${A(dx)} = ${M(ax)}<br>y 座標：${M(y)} ${dy>0?'+':'−'} ${A(dy)} = ${M(ay)}<br>答え：A′<b>(${M(ax)}, ${M(ay)})</b>`};
+  }
+  if(t===1){
+    const x=pt(),y=pt(),ax=pick(['x','y']),ans=ax==='x'?[x,-y]:[-x,y];
+    return {type:'coord',label:'A′',answer:ans,svg:plane([{x,y,label:'A'}]),
+      text:`点 A(${M(x)}, ${M(y)}) を、<b>${ax} 軸</b>を対称の軸として対称移動した点 A′ の座標を求めなさい。`,
+      explain:`${ax} 軸について対称移動すると、<b>${ax==='x'?'y':'x'} 座標の符号</b>だけが変わります。<br>答え：A′<b>(${M(ans[0])}, ${M(ans[1])})</b>`};
+  }
+  if(t===2){
+    const x=pt(),y=pt(),ans=[-x,-y];
+    return {type:'coord',label:'A′',answer:ans,svg:plane([{x,y,label:'A'}]),
+      text:`点 A(${M(x)}, ${M(y)}) を、<b>原点 O を中心に 180°</b> 回転移動した点 A′ の座標を求めなさい。`,
+      explain:`原点を中心に 180° 回転すると、<b>x 座標も y 座標も符号が変わります</b>。<br>答え：A′<b>(${M(ans[0])}, ${M(ans[1])})</b>`};
+  }
+  if(t===4){
+    const x=pt(),y=pt(),ax=pick(['x','y']),dx=nz(-3,3);
+    const m=ax==='x'?[x,-y]:[-x,y], ans=[m[0]+dx,m[1]];
+    return {type:'coord',label:'A′',answer:ans,svg:plane([{x,y,label:'A'}]),
+      text:`点 A(${M(x)}, ${M(y)}) を、<b>${ax} 軸</b>について対称移動し、さらに<b>${dx>0?'右':'左'}に ${A(dx)}</b> 平行移動した点 A′ の座標を求めなさい。`,
+      explain:`① ${ax} 軸について対称移動 → (${M(m[0])}, ${M(m[1])})<br>② ${dx>0?'右':'左'}に ${A(dx)} → x 座標 ${M(m[0])} ${dx>0?'+':'−'} ${A(dx)} = ${M(ans[0])}<br>答え：A′<b>(${M(ans[0])}, ${M(ans[1])})</b>`};
+  }
+  // どの移動か当てる
+  const shapes=[[[0,0],[3,0],[0,2]],[[0,0],[3,0],[1,2]],[[0,0],[2,0],[3,3]],[[0,0],[1,2],[3,2]]];
+  let s=pick(shapes); if(Math.random()<.5){const my=Math.max(...s.map(p=>p[1])); s=s.map(p=>[p[0],my-p[1]]);}
+  const ox=R(1,2),oy=R(1,2),a=s.map(p=>[p[0]+ox,p[1]+oy]);
+  const xs=a.map(p=>p[0]),ys=a.map(p=>p[1]),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const k=R(0,2); let b;
+  if(k===0){const dx=R(5,6),dy=R(-1,2); b=a.map(p=>[p[0]+dx,p[1]+dy]);}
+  else if(k===1){const cx=maxX+1,cy=Math.round((minY+maxY)/2); b=a.map(p=>[2*cx-p[0],2*cy-p[1]]);}
+  else {const L=maxX+1; b=a.map(p=>[2*L-p[0],p[1]]);}
+  const ex=['形も<b>向きも同じまま</b>、ずらしただけなので <b>平行移動</b> です。',
+            '向きが <b>180° 回って</b>います（裏返ってはいません）。なので <b>回転移動</b> です。',
+            '鏡に映したように <b>裏返った形</b>になっています。なので <b>対称移動</b> です。'];
+  return {type:'choice',choices:['平行移動','回転移動','対称移動'],answer:k,svg:shapeFig(a,b),
+    text:`図形ア を、ある移動を<b>1回</b>して図形イ に重ねました。<br>どの移動ですか。`,
+    explain:ex[k]};
+}
+
+/* ---------- 画面 ---------- */
+const UNITS={prop:{name:'比例と反比例',gen:genProp},eq:{name:'方程式',gen:genEq},move:{name:'図形の移動',gen:genMove}};
+const LEVELS={basic:'基本',std:'標準'};
+const S={name:store.get('mh_name',''),unit:store.get('mh_unit','eq'),level:store.get('mh_level','basic'),count:store.get('mh_count',5)};
+if(!UNITS[S.unit]) S.unit='eq';
+let Q=null;
+const app=document.getElementById('app');
+const $=id=>document.getElementById(id);
+
+function plain(html){
+  const d=document.createElement('div');
+  d.innerHTML=html.replace(/<br\s*\/?>/g,' ').replace(/<span class="eq">/g,'<span> ');
+  d.querySelectorAll('.frac').forEach(f=>f.replaceWith(f.dataset.t));
+  return d.textContent.replace(/\s+/g,' ').trim();
+}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800);}
+
+function home(){
+  const hist=store.get('mh_hist',[]);
+  const seg=(id,obj,cur)=>`<div class="seg ${id==='units'?'col':''}" id="${id}">${Object.entries(obj).map(([k,v])=>`<button class="opt ${String(cur)===k?'on':''}" data-k="${k}">${v}</button>`).join('')}</div>`;
+  app.innerHTML=`
+  <header class="top"><h1>中1 数学ドリル</h1><p class="sub">単元を選んで、問題をといてみよう</p></header>
+  <section class="card">
+    <label class="lbl" for="nm">なまえ</label>
+    <input id="nm" class="txt" type="text" placeholder="例：山田 花子" value="${esc(S.name)}" maxlength="20" autocomplete="off">
+    <div class="lbl">単元</div>${seg('units',Object.fromEntries(Object.entries(UNITS).map(([k,u])=>[k,u.name])),S.unit)}
+    <div class="lbl">レベル</div>${seg('levels',LEVELS,S.level)}
+    <div class="lbl">問題数</div>${seg('counts',{5:'5問',10:'10問',15:'15問'},S.count)}
+    <button class="btn pri big" id="start">スタート</button>
+  </section>
+  ${hist.length?`<section class="card"><h2>これまでの記録</h2><ul class="hist">${hist.slice(0,8).map(h=>`<li><span>${esc(h.date)}</span><span>${esc(h.unit)}（${esc(h.level)}）</span><b>${h.score}/${h.total}</b></li>`).join('')}</ul></section>`:''}`;
+  const bind=(id,key,conv)=>$(id).addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;S[key]=conv(b.dataset.k);store.set('mh_'+key,S[key]);$(id).querySelectorAll('.opt').forEach(x=>x.classList.toggle('on',x===b));});
+  bind('units','unit',String);bind('levels','level',String);bind('counts','count',Number);
+  $('nm').addEventListener('input',e=>{S.name=e.target.value.trim();store.set('mh_name',S.name);});
+  $('start').onclick=start;
+  window.scrollTo(0,0);
+}
+
+function start(){
+  const gen=UNITS[S.unit].gen, qs=[], seen=new Set();
+  while(qs.length<S.count){
+    let q,tries=0; do{q=gen(S.level);tries++;}while(seen.has(q.text)&&tries<30);
+    seen.add(q.text); qs.push(q);
+  }
+  Q={qs,i:0,res:[]};
+  quiz();
+}
+
+function quiz(){
+  const q=Q.qs[Q.i];
+  Q.inp=q.type==='coord'?['','']:[q.type==='choice'?null:''];
+  Q.f=0; Q.done=false;
+  app.innerHTML=`
+  <header class="qtop"><button class="link" id="quit">← やめる</button><span>${UNITS[S.unit].name}・${LEVELS[S.level]}</span><span class="cnt">${Q.i+1} / ${Q.qs.length}</span></header>
+  <div class="bar"><i style="width:${Q.i/Q.qs.length*100}%"></i></div>
+  <section class="card"><div class="qno">第${Q.i+1}問</div><div class="qtext">${q.text}</div>${q.svg?`<div class="fig">${q.svg}</div>`:''}</section>
+  <section class="card" id="ans"></section>`;
+  $('quit').onclick=()=>{if(confirm('とちゅうでやめてホームにもどりますか？'))home();};
+  $('ans').onclick=onAns;
+  renderAns();
+  window.scrollTo(0,0);
+}
+
+function filled(){return Q.inp.every(v=>v!==null&&v!==''&&v!=='−');}
+function renderAns(){
+  const q=Q.qs[Q.i], el=$('ans');
+  if(Q.done) return;
+  const box=i=>`<button class="box ${Q.f===i?'f':''}" data-f="${i}" aria-label="答えの入力らん">${Q.inp[i]||'&nbsp;'}</button>`;
+  let h='';
+  if(q.type==='choice'){
+    h=`<div class="choices">${q.choices.map((c,i)=>`<button class="opt ${Q.inp[0]===i?'on':''}" data-c="${i}">${c}</button>`).join('')}</div>`;
+  }else{
+    h=q.type==='coord'
+      ?`<div class="arow coord"><span>${q.label}(</span>${box(0)}<span>,</span>${box(1)}<span>)</span></div>`
+      :`<div class="arow"><span>${q.label}</span>${box(0)}${q.unit?`<span>${q.unit}</span>`:''}</div>`;
+    h+=`<div class="keys">${['7','8','9','4','5','6','1','2','3','±','0','⌫'].map(k=>`<button data-k="${k}" aria-label="${k==='±'?'マイナスをつける・はずす':k==='⌫'?'1文字けす':k}">${k==='±'?'＋/−':k}</button>`).join('')}</div>`;
+  }
+  h+=`<button class="btn pri big" id="chk" ${filled()?'':'disabled'}>答え合わせ</button>`;
+  el.innerHTML=h;
+}
+function onAns(e){
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.id==='chk') return check();
+  if(b.id==='next') return next();
+  if(Q.done) return;
+  if(b.dataset.c!==undefined){Q.inp[0]=+b.dataset.c;return renderAns();}
+  if(b.dataset.f!==undefined){Q.f=+b.dataset.f;return renderAns();}
+  const k=b.dataset.k; if(!k) return;
+  let v=Q.inp[Q.f];
+  if(k==='⌫') v=v.slice(0,-1);
+  else if(k==='±') v=v.startsWith('−')?v.slice(1):'−'+v;
+  else { const d=v.replace('−',''); if(d.length>=5) return; v=(d==='0'?v.replace(/0$/,''):v)+k; }
+  Q.inp[Q.f]=v;
+  renderAns();
+}
+const num=s=>{const t=s.replace('−','-');return /^-?\d+$/.test(t)?parseInt(t,10):null;};
+function fmtAns(q){return q.type==='coord'?`(${M(q.answer[0])}, ${M(q.answer[1])})`:q.type==='choice'?q.choices[q.answer]:M(q.answer)+(q.unit||'');}
+function fmtInp(q,inp){return q.type==='coord'?`(${inp[0]}, ${inp[1]})`:q.type==='choice'?q.choices[inp[0]]:inp[0]+(q.unit||'');}
+function check(){
+  if(!filled()) return;
+  const q=Q.qs[Q.i];
+  let ok;
+  if(q.type==='choice') ok=Q.inp[0]===q.answer;
+  else if(q.type==='coord') ok=num(Q.inp[0])===q.answer[0]&&num(Q.inp[1])===q.answer[1];
+  else ok=num(Q.inp[0])===q.answer;
+  Q.res.push({q,inp:fmtInp(q,Q.inp),ok});
+  Q.done=true;
+  const last=Q.i===Q.qs.length-1;
+  $('ans').innerHTML=`
+    <div class="fb ${ok?'ok':'ng'}"><div class="mark">${ok?'◯ 正解！':'✕ おしい！'}</div>
+      ${ok?'':`<div class="you">あなたの答え：${esc(fmtInp(q,Q.inp))}</div><div class="you">正しい答え：<b>${fmtAns(q)}</b></div>`}</div>
+    <div class="exp"><div class="exph">解き方</div>${q.explain}</div>
+    <button class="btn pri big" id="next">${last?'結果を見る':'次の問題へ'}</button>`;
+  document.querySelector('.bar i').style.width=((Q.i+1)/Q.qs.length*100)+'%';
+  $('ans').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function next(){ if(Q.i<Q.qs.length-1){Q.i++;quiz();} else result(); }
+
+function result(){
+  const sc=Q.res.filter(r=>r.ok).length, tot=Q.res.length, pct=sc/tot;
+  const d=new Date(), ds=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const hist=store.get('mh_hist',[]); hist.unshift({date:ds,unit:UNITS[S.unit].name,level:LEVELS[S.level],score:sc,total:tot}); store.set('mh_hist',hist.slice(0,30));
+  const msg=pct===1?'全問正解！すばらしい！':pct>=.8?'よくできました！':pct>=.5?'あと少し！まちがえた問題を見直そう':'解き方を読んで、もう一度チャレンジしよう';
+  const text=[`【数学の宿題 結果】`,`名前：${S.name||'（未入力）'}`,`単元：中1 ${UNITS[S.unit].name}（${LEVELS[S.level]}）`,`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,'',
+    ...Q.res.map((r,i)=>`${i+1}. ${r.ok?'◯':'✕'} ${plain(r.q.text)}\n   答え：${r.inp}${r.ok?'':`（正：${fmtAns(r.q)}）`}`)].join('\n');
+  app.innerHTML=`
+  <header class="top"><h1>結果</h1><p class="sub">${esc(S.name||'')} ${UNITS[S.unit].name}・${LEVELS[S.level]}</p></header>
+  <section class="card"><div class="score"><b>${sc}</b><small> / ${tot}</small><p>${msg}</p></div>
+    <button class="btn pri big" id="copy">結果をコピーして先生に送る</button>
+    <div class="row2"><button class="btn" id="again">もう一度</button><button class="btn" id="home">ホームへ</button></div></section>
+  <section class="card"><h2>ふりかえり</h2><ul class="rlist">${Q.res.map((r,i)=>`<li><span class="m ${r.ok?'ok':'ng'}">${r.ok?'◯':'✕'}</span><div><div>${i+1}. ${esc(plain(r.q.text))}</div><div class="d">あなた：${esc(r.inp)}${r.ok?'':`　正解：${fmtAns(r.q)}`}</div></div></li>`).join('')}</ul></section>`;
+  $('copy').onclick=()=>copy(text);
+  $('again').onclick=start; $('home').onclick=home;
+  window.scrollTo(0,0);
+}
+function copy(t){
+  const done=()=>toast('コピーしました。LINEやメールに貼りつけて送ってね');
+  const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done();}catch(e){toast('コピーできませんでした');}a.remove();};
+  if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(done,fb); else fb();
+}
+home();
+</script>
+</body>
+</html>
