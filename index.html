@@ -100,6 +100,19 @@ a.btn{text-align:center;text-decoration:none;color:inherit}
 .lg.done{background:var(--pri)}.lg.gold{background:var(--gold)}.lg.silver{background:var(--silver)}.lg.bronze{background:var(--bronze)}
 .stamp{width:92px;height:92px;border-radius:50%;border:4px solid var(--pri);color:var(--pri);margin:4px auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:13px;transform:rotate(-12deg);animation:stp .5s cubic-bezier(.2,1.6,.4,1) both}
 .stamp span{font-size:20px;line-height:1.2}
+.stamp .ic{width:28px;height:28px;margin-bottom:-2px}
+.stamp.gold .ic{width:44px;height:44px}
+.stamp.silver .ic{width:36px;height:36px}
+.stamp.bronze .ic{width:32px;height:32px}
+.stamp.gold{background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.stamp.silver{background:color-mix(in srgb,var(--silver) 12%,transparent)}
+.stamp.bronze{background:color-mix(in srgb,var(--bronze) 12%,transparent)}
+.d{flex-direction:column;line-height:1}
+.d .ic{width:15px;height:15px;margin-bottom:1px}
+.d .ic+span{font-size:11px}
+.lgi svg{width:16px;height:16px;vertical-align:-3px;margin-right:2px}
+.lgi.gold svg{color:var(--gold)}.lgi.silver svg{color:var(--silver)}.lgi.bronze svg{color:var(--bronze)}
+.d.bronze .ic path:last-child{fill:var(--bronze)}
 .stamp.gold{width:136px;height:136px;border-width:6px;border-color:var(--gold);color:var(--gold);font-size:16px}
 .stamp.gold span{font-size:30px}
 .stamp.silver{width:118px;height:118px;border-width:5px;border-color:var(--silver);color:var(--silver);font-size:15px}
@@ -296,6 +309,12 @@ if(DIRECT){
 const p2=n=>String(n).padStart(2,'0');
 const dk=d=>`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
 const RK=['gold','silver','bronze','done'], RKN=['金','銀','銅',''];
+const RKL=['金の王冠！','トロフィー！','銅メダル！'];
+const ICON={
+  gold:`<svg viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M3 17 4.5 7.5l4.5 4L12 5l3 6.5 4.5-4L21 17z" fill="currentColor"/><rect x="3" y="18.5" width="18" height="2.5" rx="1" fill="currentColor"/><circle cx="4.5" cy="6.6" r="1.7" fill="currentColor"/><circle cx="12" cy="3.9" r="1.7" fill="currentColor"/><circle cx="19.5" cy="6.6" r="1.7" fill="currentColor"/></svg>`,
+  silver:`<svg viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M7 3h10v5a5 5 0 0 1-10 0z" fill="currentColor"/><path d="M7 5H4.2v1.4A3.6 3.6 0 0 0 7.8 10M17 5h2.8v1.4A3.6 3.6 0 0 1 16.2 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="10.9" y="12.6" width="2.2" height="4.6" fill="currentColor"/><rect x="7.5" y="17" width="9" height="4" rx="1" fill="currentColor"/></svg>`,
+  bronze:`<svg viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M6.5 2h4.2l2.4 6.8H8.9zM17.5 2h-4.2l-2.4 6.8h4.2z" fill="currentColor" opacity=".65"/><circle cx="12" cy="15" r="6.6" fill="currentColor"/><path d="m12 11.4 1.1 2.3 2.5.3-1.8 1.7.5 2.5L12 17l-2.3 1.2.5-2.5-1.8-1.7 2.5-.3z" fill="var(--card)" opacity=".9"/></svg>`
+};
 const rankOf=v=>v.r!==undefined?v.r:(v.p?0:3);   // 0金 1銀 2銅 3ふつう
 function streak(days){const d=new Date();let n=0;if(!days[dk(d)])d.setDate(d.getDate()-1);while(days[dk(d)]){n++;d.setDate(d.getDate()-1);}return n;}
 function calHTML(days){
@@ -304,12 +323,12 @@ function calHTML(days){
   for(let i=0;i<first;i++) h+='<div></div>';
   for(let d=1;d<=last;d++){
     const k=pre+p2(d),v=days[k],wd=(first+d-1)%7;
-    h+=`<div class="d ${wd===0?'sun':wd===6?'sat':''} ${k===tk?'today':''} ${k>tk?'future':''} ${v?RK[rankOf(v)]:''}" aria-label="${m+1}月${d}日${v?(rankOf(v)<3?` ${RKN[rankOf(v)]}のマーク`:' 取り組んだ日'):''}">${d}</div>`;
+    h+=`<div class="d ${wd===0?'sun':wd===6?'sat':''} ${k===tk?'today':''} ${k>tk?'future':''} ${v?RK[rankOf(v)]:''}" aria-label="${m+1}月${d}日${v?(rankOf(v)<3?` ${RKN[rankOf(v)]}のマーク`:' 取り組んだ日'):''}">${v&&rankOf(v)<3?ICON[RK[rankOf(v)]]:''}<span>${d}</span></div>`;
   }
   const cnt=Object.keys(days).filter(k=>k.startsWith(pre)).length;
   return `<div class="cal-h"><button id="cprev" aria-label="前の月">‹</button><b>${y}年 ${m+1}月</b><button id="cnext" aria-label="次の月">›</button></div>
   <div class="cal">${h}</div>
-  <div class="cal-f"><span><i class="lg gold"></i>全問正解</span><span><i class="lg silver"></i>1問ミス</span><span><i class="lg bronze"></i>2問ミス</span><span><i class="lg done"></i>取り組んだ日</span><span>今月 <b>${cnt}</b> 日</span></div>`;
+  <div class="cal-f"><span class="lgi gold">${ICON.gold}全問正解</span><span class="lgi silver">${ICON.silver}1問ミス</span><span class="lgi bronze">${ICON.bronze}2問ミス</span><span><i class="lg done"></i>取り組んだ日</span><span>今月 <b>${cnt}</b> 日</span></div>`;
 }
 function bindCal(days){
   const mv=s=>{S.cm+=s;if(S.cm<0){S.cm=11;S.cy--;}if(S.cm>11){S.cm=0;S.cy++;}$('calbox').innerHTML=calHTML(days);bindCal(days);};
@@ -447,8 +466,8 @@ function result(){
   app.innerHTML=`
   <header class="top"><h1>結果</h1><p class="sub">${UNITS[S.unit].name}・${LEVELS[S.level]}</p></header>
   <section class="card">
-    <div class="stamp ${RK[rank]}"><span>${d.getMonth()+1}/${d.getDate()}</span>${rank<3?RKN[rank]+'のハンコ！':firstToday?'マークGET！':'今日もできた！'}</div>
-    <div class="stk">${['全問正解で<b>金のハンコ</b>！','1問ミスで<b>銀のハンコ</b>！あと1問で金！','2問ミスで<b>銅のハンコ</b>！','カレンダーにマークがついたよ'][rank]}${best<rank?`<br>今日のカレンダーは<b>${RKN[best]}のマーク</b>のまま`:''}<br>れんぞく <b>${st}</b> 日</div>
+    <div class="stamp ${RK[rank]}">${rank<3?ICON[RK[rank]]:''}<span>${d.getMonth()+1}/${d.getDate()}</span>${rank<3?RKL[rank]:firstToday?'マークGET！':'今日もできた！'}</div>
+    <div class="stk">${['全問正解で<b>金の王冠</b>！','1問ミスで<b>銀のトロフィー</b>！あと1問で王冠！','2問ミスで<b>銅メダル</b>！','カレンダーにマークがついたよ'][rank]}${best<rank?`<br>今日のカレンダーは<b>${RKN[best]}のマーク</b>のまま`:''}<br>れんぞく <b>${st}</b> 日</div>
     <div class="score"><b>${sc}</b><small> / ${tot}</small><p>${msg}</p></div>
     <a class="btn big line" id="line" href="https://line.me/R/share?text=${encodeURIComponent(text())}">LINEで先生に送る</a>
     <button class="link small" id="copy">LINEがうまく開かないときは、結果をコピー</button></section>
