@@ -27,6 +27,9 @@ button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:tra
 .btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;background:var(--key)}
 .btn.pri{background:var(--pri);color:var(--pri-ink)}
 .btn:disabled{opacity:.4;cursor:default}
+a.btn{text-align:center;text-decoration:none;color:inherit}
+.btn.line{background:#06c755;color:#fff}
+.link.small{display:block;margin:10px auto 0;font-size:13px;font-weight:500}
 .big{margin-top:20px;padding:16px;font-size:17px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .hist{list-style:none;margin:0;padding:0}
@@ -335,8 +338,6 @@ function home(){
     <div id="calbox">${calHTML(days)}</div>
   </section>
   <section class="card">
-    <label class="lbl" for="nm">なまえ</label>
-    <input id="nm" class="txt" type="text" placeholder="例：山田 花子" value="${esc(S.name)}" maxlength="20" autocomplete="off">
     <div class="lbl">単元</div>${seg('units',Object.fromEntries(Object.entries(UNITS).map(([k,u])=>[k,u.name])),S.unit)}
     <div class="lbl">レベル</div>${seg('levels',LEVELS,S.level)}
     <div class="lbl">問題数</div>${seg('counts',{5:'5問',10:'10問',15:'15問'},S.count)}
@@ -345,7 +346,6 @@ function home(){
   ${hist.length?`<section class="card"><h2>これまでの記録</h2><ul class="hist">${hist.slice(0,8).map(h=>`<li><span>${esc(h.date)}</span><span>${esc(h.unit)}（${esc(h.level)}）</span><b>${h.score}/${h.total}</b></li>`).join('')}</ul></section>`:''}`;
   const bind=(id,key,conv)=>$(id).addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;S[key]=conv(b.dataset.k);store.set('mh_'+key,S[key]);$(id).querySelectorAll('.opt').forEach(x=>x.classList.toggle('on',x===b));});
   bind('units','unit',String);bind('levels','level',String);bind('counts','count',Number);
-  $('nm').addEventListener('input',e=>{S.name=e.target.value.trim();store.set('mh_name',S.name);});
   $('start').onclick=start;
   bindCal(days);
   window.scrollTo(0,0);
@@ -442,30 +442,29 @@ function result(){
   const st=streak(days);
   const msg=pct===1?'全問正解！すばらしい！':pct>=.8?'よくできました！':pct>=.5?'あと少し！まちがえた問題を見直そう':'解き方を読んで、もう一度チャレンジしよう';
   const now=new Date(); S.cy=now.getFullYear(); S.cm=now.getMonth();
-  const text=()=>[`【数学の宿題 結果】`,`名前：${S.name||'（未入力）'}`,`単元：中1 ${UNITS[S.unit].name}（${LEVELS[S.level]}）`,`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,`れんぞく：${st}日`,'',
+  const text=()=>[`【数学の宿題 結果】`,`単元：中1 ${UNITS[S.unit].name}（${LEVELS[S.level]}）`,`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,`れんぞく：${st}日`,'',
     ...Q.res.map((r,i)=>`${i+1}. ${r.ok?'◯':'✕'} ${plain(r.q.text)}\n   答え：${r.inp}${r.ok?'':`（正：${fmtAns(r.q)}）`}`)].join('\n');
   app.innerHTML=`
-  <header class="top"><h1>結果</h1><p class="sub">${esc(S.name||'')} ${UNITS[S.unit].name}・${LEVELS[S.level]}</p></header>
+  <header class="top"><h1>結果</h1><p class="sub">${UNITS[S.unit].name}・${LEVELS[S.level]}</p></header>
   <section class="card">
     <div class="stamp ${RK[rank]}"><span>${d.getMonth()+1}/${d.getDate()}</span>${rank<3?RKN[rank]+'のハンコ！':firstToday?'マークGET！':'今日もできた！'}</div>
     <div class="stk">${['全問正解で<b>金のハンコ</b>！','1問ミスで<b>銀のハンコ</b>！あと1問で金！','2問ミスで<b>銅のハンコ</b>！','カレンダーにマークがついたよ'][rank]}${best<rank?`<br>今日のカレンダーは<b>${RKN[best]}のマーク</b>のまま`:''}<br>れんぞく <b>${st}</b> 日</div>
     <div class="score"><b>${sc}</b><small> / ${tot}</small><p>${msg}</p></div>
-    ${S.name?'':`<label class="lbl" for="rnm">なまえ（先生に送るときに使うよ）</label><input id="rnm" class="txt" type="text" placeholder="例：山田 花子" maxlength="20" autocomplete="off">`}
-    <button class="btn pri big" id="copy">結果をコピーして先生に送る</button></section>
+    <a class="btn big line" id="line" href="https://line.me/R/share?text=${encodeURIComponent(text())}">LINEで先生に送る</a>
+    <button class="link small" id="copy">LINEがうまく開かないときは、結果をコピー</button></section>
   <section class="card"><h2>つぎのレベルをえらぶ</h2>
     <div class="row2">${Object.entries(LEVELS).map(([lk,lv])=>`<button class="btn ${lk===S.level?'':'pri'}" data-lv="${lk}">${lv}で${S.count}問${lk===S.level?'<br><small>もう一度</small>':''}</button>`).join('')}</div>
     ${DIRECT?'':'<button class="link" id="home" style="margin-top:10px">ほかの単元をえらぶ</button>'}</section>
   <section class="card"><div class="streak"><div><b>あなたのカレンダー</b><br>毎日マークをふやそう</div><div class="sn">れんぞく<b>${st}</b>日</div></div><div id="calbox">${calHTML(days)}</div></section>
   <section class="card"><h2>ふりかえり</h2><ul class="rlist">${Q.res.map((r,i)=>`<li><span class="m ${r.ok?'ok':'ng'}">${r.ok?'◯':'✕'}</span><div><div>${i+1}. ${esc(plain(r.q.text))}</div><div class="rd">あなた：${esc(r.inp)}${r.ok?'':`　正解：${fmtAns(r.q)}`}</div></div></li>`).join('')}</ul></section>`;
-  $('copy').onclick=()=>{ if($('rnm')&&!S.name){toast('なまえを入れてね');$('rnm').focus();return;} copy(text()); };
-  if($('rnm')) $('rnm').addEventListener('input',e=>{S.name=e.target.value.trim();store.set('mh_name',S.name);});
+  $('copy').onclick=()=>copy(text());
   app.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{S.level=b.dataset.lv;start();});
   if($('home')) $('home').onclick=home;
   bindCal(days);
   window.scrollTo(0,0);
 }
 function copy(t){
-  const done=()=>toast('コピーしました。LINEやメールに貼りつけて送ってね');
+  const done=()=>toast('コピーしました。LINEに貼りつけて送ってね');
   const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done();}catch(e){toast('コピーできませんでした');}a.remove();};
   if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(done,fb); else fb();
 }
