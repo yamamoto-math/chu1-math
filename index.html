@@ -132,6 +132,7 @@ svg text{font-family:inherit}
 .pt{fill:var(--pri)}
 .ptl{fill:var(--ink);font-size:13px;font-weight:700}
 .gd{stroke:var(--axis);stroke-width:1;stroke-dasharray:3 3}.tk2{fill:var(--sub);font-size:11px}.axl2{fill:var(--sub);font-size:11px}.lnA{fill:none;stroke:var(--shA);stroke-width:2.5}.lnB{fill:none;stroke:var(--shB);stroke-width:2.5}.lnl{font-size:13px;font-weight:700}.lnAt{fill:var(--shA);stroke:none}.lnBt{fill:var(--shB);stroke:none}.rc{fill:none;stroke:var(--ink);stroke-width:2}.qtext small{color:var(--sub);font-size:13px}
+.miss .mh{display:flex;justify-content:space-between;align-items:baseline}.miss .mh span b{font-size:22px;color:var(--ng)}.ms{color:var(--sub);font-size:13px;margin:6px 0 10px}.miss .btn{width:100%;margin-top:8px}.qu{margin-left:8px;font-weight:600;color:var(--sub)}
 .shA{fill:color-mix(in srgb,var(--shA) 30%,transparent);stroke:var(--shA);stroke-width:2}
 .shB{fill:color-mix(in srgb,var(--shB) 30%,transparent);stroke:var(--shB);stroke-width:2}
 .shl{fill:var(--ink);font-size:14px;font-weight:700}
@@ -407,11 +408,29 @@ const S={name:store.get('mh_name',''),unit:store.get('mh_unit','eq'),level:store
 if(!UNITS[S.unit]) S.unit='eq';
 /* URLで単元・レベル・問題数を指定すると、開いてすぐ1問目から始まる（例：?u=prop&lv=std&n=5） */
 const URLP=new URLSearchParams(location.search);
-const DIRECT=!!UNITS[URLP.get('u')];
+const REVU=URLP.get('m');                     // ?m=all（全部）/ ?m=prop など（単元だけ）
+const DIRECT=!!UNITS[URLP.get('u')]||REVU!==null;
 if(DIRECT){
   S.unit=URLP.get('u');
   S.level=LEVELS[URLP.get('lv')]?URLP.get('lv'):'basic';
   const n=+URLP.get('n'); S.count=[5,10,15].includes(n)?n:5;
+}
+/* まちがえた問題リスト（mh_miss）：まちがえると入り、やり直しで正解すると消える */
+const missList=()=>store.get('mh_miss',[]);
+function missAdd(q){const l=missList().filter(x=>x.q.text!==q.text); l.push({u:S.unit,q,t:Date.now()}); store.set('mh_miss',l.slice(-80));}
+function missDel(q){store.set('mh_miss',missList().filter(x=>x.q.text!==q.text));}
+const missOf=f=>missList().filter(x=>!f||f==='all'||x.u===f);
+function missCard(f){
+  const n=missOf(f).length;
+  return n?`<section class="card miss"><div class="mh"><b>まちがえた問題リスト</b><span><b>${n}</b> 問</span></div><p class="ms">テスト前にもう一度。正解するとリストから消えるよ</p><button class="btn pri" id="rev">まちがえた問題だけやる</button></section>`
+    :`<section class="card miss"><div class="mh"><b>まちがえた問題リスト</b><span><b>0</b> 問</span></div><p class="ms">まちがえた問題はここにたまるよ</p></section>`;
+}
+function review(f){
+  S.rf=f||'all';
+  const l=missOf(S.rf);
+  if(!l.length){ app.innerHTML=`<header class="top"><h1>まちがい直し</h1></header><section class="card"><p class="ms" style="text-align:center;font-size:16px">まちがえた問題はありません！<br>すばらしい！</p>${REVU!==null?'':'<button class="btn pri big" id="home">ホームへ</button>'}</section>`; if($('home'))$('home').onclick=home; return; }
+  Q={qs:l.slice(0,10).map(x=>x.q),us:l.slice(0,10).map(x=>x.u),i:0,res:[],rev:true};
+  quiz();
 }
 
 /* ---------- カレンダー ---------- */
@@ -471,10 +490,12 @@ function home(){
     <div class="lbl">問題数</div>${seg('counts',{5:'5問',10:'10問',15:'15問'},S.count)}
     <button class="btn pri big" id="start">スタート</button>
   </section>
+  ${missCard('all')}
   ${hist.length?`<section class="card"><h2>これまでの記録</h2><ul class="hist">${hist.slice(0,8).map(h=>`<li><span>${esc(h.date)}</span><span>${esc(h.unit)}（${esc(h.level)}）</span><b>${h.score}/${h.total}</b></li>`).join('')}</ul></section>`:''}`;
   const bind=(id,key,conv)=>$(id).addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;S[key]=conv(b.dataset.k);store.set('mh_'+key,S[key]);$(id).querySelectorAll('.opt').forEach(x=>x.classList.toggle('on',x===b));});
   bind('units','unit',String);bind('levels','level',String);bind('counts','count',Number);
   $('start').onclick=start;
+  if($('rev')) $('rev').onclick=()=>review('all');
   bindCal(days);
   window.scrollTo(0,0);
 }
@@ -494,9 +515,9 @@ function quiz(){
   Q.inp=q.type==='coord'?['','']:[q.type==='choice'?null:''];
   Q.f=0; Q.done=false;
   app.innerHTML=`
-  <header class="qtop">${DIRECT?'<span></span>':'<button class="link" id="quit">← やめる</button>'}<span>${UNITS[S.unit].name}・${LEVELS[S.level]}</span><span class="cnt">${Q.i+1} / ${Q.qs.length}</span></header>
+  <header class="qtop">${DIRECT?'<span></span>':'<button class="link" id="quit">← やめる</button>'}<span>${Q.rev?'まちがい直し':UNITS[S.unit].name+'・'+LEVELS[S.level]}</span><span class="cnt">${Q.i+1} / ${Q.qs.length}</span></header>
   <div class="bar"><i style="width:${Q.i/Q.qs.length*100}%"></i></div>
-  <section class="card"><div class="qno">第${Q.i+1}問</div><div class="qtext">${q.text}</div>${q.svg?`<div class="fig">${q.svg}</div>`:''}</section>
+  <section class="card"><div class="qno">第${Q.i+1}問${Q.rev&&UNITS[Q.us[Q.i]]?`<span class="qu">${UNITS[Q.us[Q.i]].name}</span>`:''}</div><div class="qtext">${q.text}</div>${q.svg?`<div class="fig">${q.svg}</div>`:''}</section>
   <section class="card" id="ans"></section>`;
   if($('quit')) $('quit').onclick=()=>{if(confirm('とちゅうでやめてホームにもどりますか？'))home();};
   $('ans').onclick=onAns;
@@ -547,10 +568,11 @@ function check(){
   else if(q.type==='coord') ok=num(Q.inp[0])===q.answer[0]&&num(Q.inp[1])===q.answer[1];
   else ok=num(Q.inp[0])===q.answer;
   Q.res.push({q,inp:fmtInp(q,Q.inp),ok});
+  if(Q.rev){ if(ok) missDel(q); } else if(!ok) missAdd(q);
   Q.done=true;
   const last=Q.i===Q.qs.length-1;
   $('ans').innerHTML=`
-    <div class="fb ${ok?'ok':'ng'}"><div class="mark">${ok?'◯ 正解！':'✕ おしい！'}</div>
+    <div class="fb ${ok?'ok':'ng'}"><div class="mark">${ok?'◯ 正解！':'✕ おしい！'}</div>${Q.rev&&ok?'<div class="you">リストから消えたよ！</div>':!Q.rev&&!ok?'<div class="you">まちがえた問題リストに入れたよ</div>':''}
       ${ok?'':`<div class="you">あなたの答え：${esc(fmtInp(q,Q.inp))}</div><div class="you">正しい答え：<b>${fmtAns(q)}</b></div>`}</div>
     <div class="exp"><div class="exph">解き方</div>${q.explain}</div>
     <button class="btn pri big" id="next">${last?'結果を見る':'次の問題へ'}</button>`;
@@ -562,7 +584,8 @@ function next(){ if(Q.i<Q.qs.length-1){Q.i++;quiz();} else result(); }
 function result(){
   const sc=Q.res.filter(r=>r.ok).length, tot=Q.res.length, pct=sc/tot;
   const d=new Date(), ds=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-  const hist=store.get('mh_hist',[]); hist.unshift({date:ds,unit:UNITS[S.unit].name,level:LEVELS[S.level],score:sc,total:tot}); store.set('mh_hist',hist.slice(0,30));
+  const uname=Q.rev?'まちがい直し':UNITS[S.unit].name, lname=Q.rev?'リスト':LEVELS[S.level];
+  const hist=store.get('mh_hist',[]); hist.unshift({date:ds,unit:uname,level:lname,score:sc,total:tot}); store.set('mh_hist',hist.slice(0,30));
   const days=store.get('mh_days',{}), k=dk(d), firstToday=!days[k];
   const miss=tot-sc, rank=miss<=2?miss:3, prev=days[k]?rankOf(days[k]):3;
   days[k]={n:((days[k]&&days[k].n)||0)+1,r:Math.min(prev,rank)}; store.set('mh_days',days);
@@ -570,24 +593,27 @@ function result(){
   const st=streak(days);
   const msg=pct===1?'全問正解！すばらしい！':pct>=.8?'よくできました！':pct>=.5?'あと少し！まちがえた問題を見直そう':'解き方を読んで、もう一度チャレンジしよう';
   const now=new Date(); S.cy=now.getFullYear(); S.cm=now.getMonth();
-  const text=()=>[`【数学の宿題 結果】`,`単元：${UNITS[S.unit].g} ${UNITS[S.unit].name}（${LEVELS[S.level]}）`,`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,`れんぞく：${st}日`,'',
+  const text=()=>[`【数学の宿題 結果】`,(Q.rev?`単元：まちがい直し（のこり ${missOf(S.rf).length}問）`:`単元：${UNITS[S.unit].g} ${UNITS[S.unit].name}（${LEVELS[S.level]}）`),`日時：${d.getFullYear()}/${ds}`,`得点：${sc} / ${tot}`,`れんぞく：${st}日`,'',
     ...Q.res.map((r,i)=>`${i+1}. ${r.ok?'◯':'✕'} ${plain(r.q.text)}\n   答え：${r.inp}${r.ok?'':`（正：${fmtAns(r.q)}）`}`)].join('\n');
   app.innerHTML=`
-  <header class="top"><h1>結果</h1><p class="sub">${UNITS[S.unit].name}・${LEVELS[S.level]}</p></header>
+  <header class="top"><h1>結果</h1><p class="sub">${uname}・${lname}</p></header>
   <section class="card">
     <div class="stamp ${RK[rank]}">${rank<3?ICON[RK[rank]]:''}<span>${d.getMonth()+1}/${d.getDate()}</span>${rank<3?RKL[rank]:firstToday?'マークGET！':'今日もできた！'}</div>
     <div class="stk">${['全問正解で<b>金の王冠</b>！','1問ミスで<b>銀のトロフィー</b>！あと1問で王冠！','2問ミスで<b>銅メダル</b>！','カレンダーにマークがついたよ'][rank]}${best<rank?`<br>今日のカレンダーは<b>${RKN[best]}のマーク</b>のまま`:''}<br>れんぞく <b>${st}</b> 日</div>
     <div class="score"><b>${sc}</b><small> / ${tot}</small><p>${msg}</p></div>
     <a class="btn big line" id="line" href="https://line.me/R/share?text=${encodeURIComponent(text())}">LINEで先生に送る</a>
     <button class="link small" id="copy">LINEがうまく開かないときは、結果をコピー</button></section>
+  ${Q.rev?(missOf(S.rf).length?`<section class="card miss"><div class="mh"><b>まちがえた問題リスト</b><span>のこり <b>${missOf(S.rf).length}</b> 問</span></div><button class="btn pri" id="rev">つづけてやり直す</button></section>`:'<section class="card miss"><p class="ms" style="text-align:center;font-size:16px"><b>リストの問題をぜんぶクリア！</b></p></section>'):`
   <section class="card"><h2>つぎのレベルをえらぶ</h2>
     <div class="row2">${Object.entries(LEVELS).map(([lk,lv])=>`<button class="btn ${lk===S.level?'':'pri'}" data-lv="${lk}">${lv}で${S.count}問${lk===S.level?'<br><small>もう一度</small>':''}</button>`).join('')}</div>
     ${DIRECT?'':'<button class="link" id="home" style="margin-top:10px">ほかの単元をえらぶ</button>'}</section>
+  ${missCard(S.unit).replace('まちがえた問題リスト','まちがえた問題リスト（この単元）')}`}
   <section class="card"><div class="streak"><div><b>あなたのカレンダー</b><br>毎日マークをふやそう</div><div class="sn">れんぞく<b>${st}</b>日</div></div><div id="calbox">${calHTML(days)}</div></section>
   <section class="card"><h2>ふりかえり</h2><ul class="rlist">${Q.res.map((r,i)=>`<li><span class="m ${r.ok?'ok':'ng'}">${r.ok?'◯':'✕'}</span><div><div>${i+1}. ${esc(plain(r.q.text))}</div><div class="rd">あなた：${esc(r.inp)}${r.ok?'':`　正解：${fmtAns(r.q)}`}</div></div></li>`).join('')}</ul></section>`;
   $('copy').onclick=()=>copy(text());
   app.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{S.level=b.dataset.lv;start();});
   if($('home')) $('home').onclick=home;
+  if($('rev')) $('rev').onclick=()=>review(Q.rev?S.rf:S.unit);
   bindCal(days);
   window.scrollTo(0,0);
 }
@@ -596,7 +622,7 @@ function copy(t){
   const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done();}catch(e){toast('コピーできませんでした');}a.remove();};
   if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(done,fb); else fb();
 }
-if(DIRECT) start(); else home();
+if(REVU!==null) review(REVU); else if(DIRECT) start(); else home();
 </script>
 </body>
 </html>
