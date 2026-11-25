@@ -487,10 +487,6 @@ function copy(t){
   const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done();}catch(e){toast('コピーできませんでした');}a.remove();};
   if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(done,fb); else fb();
 }
-if(URLP.has('reset')){
-  if(confirm('カレンダーと記録をすべて消して、最初からにしますか？')){try{localStorage.removeItem('mh_days');localStorage.removeItem('mh_hist');}catch(e){} alert('リセットしました');}
-  URLP.delete('reset'); const q=URLP.toString(); history.replaceState(null,'',location.pathname+(q?'?'+q:''));
-}
 if(DIRECT) start(); else home();
 </script>
 </body>
